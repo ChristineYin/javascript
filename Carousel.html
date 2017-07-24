@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>轮播 面向对象</title>
+</head>
+<style>
+    body, ul, li, p {
+        margin: 0;
+        padding: 0;
+    }
+    ul{
+        list-style-type:none;
+    }
+    body {
+        font-family:"Times New Roman", Times, serif;
+    }
+    #box, #box2 {
+        position:relative;
+        width:492px;
+        height:172px;
+        margin:10px auto;
+    }
+    .imgList{
+        position:relative;
+        width:490px;
+        height:170px;
+        overflow:hidden;
+    }
+    .imgList li{
+        position:absolute;
+        top:0;
+        left:0;
+        width:490px;
+        height:170px;
+    }
+</style>
+<body>
+
+	<ul id="box" class="imgList"></ul>
+
+    <ul id="box2" class="imgList"></ul>
+
+    <script>
+        function Carousel () {}
+        Carousel.prototype = {
+            imgWrap: null,
+            imgList: null,
+            index: 0,
+            timer: null,
+            play: null,
+            count: 0,
+            imgUrl: [],
+            $: function(obj) {
+                if(typeof(obj) == "string") {
+                    if(obj.indexOf("#") >= 0) {
+                        obj = obj.replace("#","");
+                        if(document.getElementById(obj)) {
+                            return document.getElementById(obj);
+                        } else {
+                            return null;
+                        }
+                    } else {
+                        return document.createElement(obj);
+                    }
+                } else {
+                    return obj;
+                }
+            },
+            info: function(id) {
+                this.count = this.imgUrl.length;
+                this.imgWrap = this.$(id);
+                for(var i=0; i<this.count; i++) {
+                    var img = this.$("img");
+                    img.src = this.imgUrl[i];
+                    var li = this.$("li");
+                    li.appendChild(img);
+                    this.imgWrap.appendChild(li); 
+                }
+                this.imgList = this.imgWrap.getElementsByTagName("li");
+            },
+            start: function() {
+                this.autoplay();
+            },
+            imgShow: function() {
+                for(var i=0; i<this.count; i++) {
+                    this.imgList[i].style.opacity = 0;
+                    this.imgList[i].style.filter = "alpha(opacity=0)";
+                }
+                var $this = this;
+                var alpha = 0;
+                this.timer = setInterval(function() {
+                    alpha += 2;
+                    if (alpha > 100) { alpha = 100; }
+                    $this.imgList[$this.index].style.opacity = alpha / 100;
+                    $this.imgList[$this.index].style.filter = "alpha(opacity="+ alpha +")";
+                    if(alpha == 100) {
+                        clearInterval($this.timer)
+                    };
+                }, 20)
+            },
+            autoplay: function() {
+                var $this = this;
+                this.play = setInterval(function() {
+                    $this.index++;
+                    if($this.index > $this.count - 1) {
+                        $this.index = 0;
+                    }
+                    $this.imgShow();
+                }, 2000)
+            }
+        };
+
+        window.onload=function(){
+            //创建一个Carousel对象
+            var carousel = new Carousel();
+            //初始化
+            carousel.imgUrl=[
+                "http://i.mmcdn.cn/simba/img/T117eTXmXqXXXXXXXX.jpg",
+                "http://img03.taobaocdn.com/tps/i3/T1t8eTXbBtXXXXXXXX-490-170.png",
+                "http://i.mmcdn.cn/simba/img/T1OVOUXeNjXXXXXXXX.jpg",
+                "http://i.mmcdn.cn/simba/img/T1J.9TXc8lXXXXXXXX.jpg",
+                "http://img03.taobaocdn.com/tps/i3/T1ITuTXbRnXXXXXXXX-490-170.png"];
+            carousel.info("#box");
+            //开始
+            carousel.start();
+
+            
+            var carousel2 = new Carousel();
+            carousel2.imgUrl=[
+                "http://i.mmcdn.cn/simba/img/T117eTXmXqXXXXXXXX.jpg",
+                "http://img03.taobaocdn.com/tps/i3/T1t8eTXbBtXXXXXXXX-490-170.png",
+                "http://i.mmcdn.cn/simba/img/T1OVOUXeNjXXXXXXXX.jpg",
+                "http://i.mmcdn.cn/simba/img/T1J.9TXc8lXXXXXXXX.jpg",
+                "http://img03.taobaocdn.com/tps/i3/T1ITuTXbRnXXXXXXXX-490-170.png"];
+            carousel2.info("#box2");
+
+            setTimeout(function(){
+                carousel2.start();
+            }, 2000)
+            
+        };
+
+
+    </script>
+    
+</body>
+</html>
