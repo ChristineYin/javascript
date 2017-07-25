@@ -39,11 +39,12 @@
 <body>
 
 	<ul id="box" class="imgList"></ul>
-
     <ul id="box2" class="imgList"></ul>
 
     <script>
-        function Carousel () {}
+        function Carousel (obj) {
+            this.init(obj);
+        }
         Carousel.prototype = {
             imgWrap: null,
             imgList: null,
@@ -52,6 +53,7 @@
             play: null,
             count: 0,
             imgUrl: [],
+            id: null,
             $: function(obj) {
                 if(typeof(obj) == "string") {
                     if(obj.indexOf("#") >= 0) {
@@ -68,20 +70,23 @@
                     return obj;
                 }
             },
-            info: function(id) {
-                this.count = this.imgUrl.length;
-                this.imgWrap = this.$(id);
-                for(var i=0; i<this.count; i++) {
-                    var img = this.$("img");
-                    img.src = this.imgUrl[i];
-                    var li = this.$("li");
-                    li.appendChild(img);
-                    this.imgWrap.appendChild(li); 
+            init: function(obj) {
+                if(typeof(obj) == "object") {
+                    this.imgUrl = obj.imgUrl;
+                    this.id = obj.id;
+                    this.count = this.imgUrl.length;
+                    this.imgWrap = this.$(this.id);
+                    for(var i=0; i<this.count; i++) {
+                        var img = this.$("img");
+                        img.src = this.imgUrl[i];
+                        var li = this.$("li");
+                        li.appendChild(img);
+                        this.imgWrap.appendChild(li); 
+                    }
+                    this.imgList = this.imgWrap.getElementsByTagName("li");
+                } else {
+                    console.log('初始化数据错误！');
                 }
-                this.imgList = this.imgWrap.getElementsByTagName("li");
-            },
-            start: function() {
-                this.autoplay();
             },
             imgShow: function() {
                 for(var i=0; i<this.count; i++) {
@@ -109,33 +114,34 @@
                     }
                     $this.imgShow();
                 }, 2000)
+            },
+            start: function() {
+                this.autoplay();
             }
         };
 
         window.onload=function(){
-            //创建一个Carousel对象
-            var carousel = new Carousel();
-            //初始化
-            carousel.imgUrl=[
-                "http://i.mmcdn.cn/simba/img/T117eTXmXqXXXXXXXX.jpg",
-                "http://img03.taobaocdn.com/tps/i3/T1t8eTXbBtXXXXXXXX-490-170.png",
-                "http://i.mmcdn.cn/simba/img/T1OVOUXeNjXXXXXXXX.jpg",
-                "http://i.mmcdn.cn/simba/img/T1J.9TXc8lXXXXXXXX.jpg",
-                "http://img03.taobaocdn.com/tps/i3/T1ITuTXbRnXXXXXXXX-490-170.png"];
-            carousel.info("#box");
-            //开始
+       
+            var carousel = new Carousel({
+                id: '#box',
+                imgUrl: [
+                    "http://i.mmcdn.cn/simba/img/T117eTXmXqXXXXXXXX.jpg",
+                    "http://img03.taobaocdn.com/tps/i3/T1t8eTXbBtXXXXXXXX-490-170.png",
+                    "http://i.mmcdn.cn/simba/img/T1OVOUXeNjXXXXXXXX.jpg",
+                    "http://i.mmcdn.cn/simba/img/T1J.9TXc8lXXXXXXXX.jpg",
+                    "http://img03.taobaocdn.com/tps/i3/T1ITuTXbRnXXXXXXXX-490-170.png"]
+            });
             carousel.start();
 
-            
-            var carousel2 = new Carousel();
-            carousel2.imgUrl=[
-                "http://i.mmcdn.cn/simba/img/T117eTXmXqXXXXXXXX.jpg",
-                "http://img03.taobaocdn.com/tps/i3/T1t8eTXbBtXXXXXXXX-490-170.png",
-                "http://i.mmcdn.cn/simba/img/T1OVOUXeNjXXXXXXXX.jpg",
-                "http://i.mmcdn.cn/simba/img/T1J.9TXc8lXXXXXXXX.jpg",
-                "http://img03.taobaocdn.com/tps/i3/T1ITuTXbRnXXXXXXXX-490-170.png"];
-            carousel2.info("#box2");
-
+            var carousel2 = new Carousel({
+                id: '#box2',
+                imgUrl: [
+                    "http://i.mmcdn.cn/simba/img/T117eTXmXqXXXXXXXX.jpg",
+                    "http://img03.taobaocdn.com/tps/i3/T1t8eTXbBtXXXXXXXX-490-170.png",
+                    "http://i.mmcdn.cn/simba/img/T1OVOUXeNjXXXXXXXX.jpg",
+                    "http://i.mmcdn.cn/simba/img/T1J.9TXc8lXXXXXXXX.jpg",
+                    "http://img03.taobaocdn.com/tps/i3/T1ITuTXbRnXXXXXXXX-490-170.png"]
+            });
             setTimeout(function(){
                 carousel2.start();
             }, 2000)
