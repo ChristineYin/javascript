@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>tab选项卡 面向对象</title>
+</head>
+<style>
+	*{margin: 0; padding: 0;}
+	#box {
+		width: 400px;
+		margin: 40px auto;
+		font-size: 0;
+	}
+	#box input{
+		width: 33.3%;
+		height: 30px;
+		border: 1px solid #ddd;
+		margin: 0;
+		padding: 0;
+		background: #fff;
+	}
+    #box div{
+    	width: 400px;
+    	height: 200px;
+    	display: none;
+    	box-shadow: 0 0 10px #666;
+    }
+    #box .active{
+    	background: #ddd;
+    }
+</style>
+
+<body>
+	<div id="box">
+		<input type="button" value="1" class="active">
+		<input type="button" value="2">
+		<input type="button" value="3">
+		<div style="display: block">1</div>
+		<div>2</div>
+		<div>3</div>
+	</div>
+
+	<script>
+		function Tab(id) {
+			this.init(id);
+		};
+		Tab.prototype = {
+			tabWrap: null,
+			tabButton: null,
+			tabContainer: null,
+			count: 0,
+			$: function(obj) {
+                if(typeof(obj) == "string") {
+                    if(obj.indexOf("#") >= 0) {
+                        obj = obj.replace("#","");
+                        if(document.getElementById(obj)) {
+                            return document.getElementById(obj);
+                        } else {
+                            return null;
+                        }
+                    } else {
+                        return document.createElement(obj);
+                    }
+                } else {
+                    return obj;
+                }
+            },
+            init: function(id) {
+            	//初始化
+				this.tabWrap = this.$(id);
+				this.tabButton = this.tabWrap.getElementsByTagName("input");
+				this.tabContainer = this.tabWrap.getElementsByTagName("div");
+				this.count = this.tabButton.length;
+				for(let i=0; i<this.count; i++) {
+					var _this = this;
+					this.tabButton[i].onclick = function() {
+						_this.draw(i);
+					}
+				}
+            },
+            draw: function(index) {
+            	for(var j=0; j<this.count; j++) {
+					this.tabButton[j].className = "";
+					this.tabContainer[j].style.display = "none";
+				}
+				this.tabButton[index].className = "active";
+				this.tabContainer[index].style.display = "block";
+            }
+		};
+
+		var tab = new Tab("#box");
+
+	</script>
+</body>
+</html>

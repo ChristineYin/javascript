@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>拖拽 面向对象</title>
+</head>
+<style>
+	#div1,#div2{
+		background: red;
+		width: 300px;
+		height: 300px;
+		position: absolute;
+		cursor: move;
+	}
+</style>
+<body>
+	<div id="div1"></div>
+
+	<script>
+		function Drag(id) {
+			var _this = this;
+			this.oDiv = document.getElementById(id);
+			this.oDiv.onmousedown = function(e){
+			    _this.Down(e);
+			    return false;
+			};
+		}
+		Drag.prototype = {
+			oDiv: null,
+			disX: 0,
+			disY: 0,
+			Down: function(e) {
+				var _this = this;
+				var e = e || event;
+				this.disX = e.clientX - this.oDiv.offsetLeft;
+				this.disY = e.clientY - this.oDiv.offsetTop;
+				document.onmousemove = function(e) {
+					_this.Move(e);
+				};
+				document.onmouseup = function(e) {
+					_this.Up();
+				};
+			},
+			Move: function(e) {
+				var _this = this;
+				var e = e || event;
+				var left = e.clientX - this.disX;
+				var top = e.clientY - this.disY;
+
+				//边界
+				if(left < 0) {
+					left = 0;
+				} else if(left > document.documentElement.clientWidth - this.oDiv.offsetWidth){
+					left = document.documentElement.clientWidth - this.oDiv.offsetWidth;
+				}
+				if(top < 0) {
+					top = 0;
+				} else if (top > document.documentElement.clientHeight - this.oDiv.offsetHeight) {
+					top = document.documentElement.clientHeight - this.oDiv.offsetHeight;
+				}
+
+				this.oDiv.style.left = left + 'px';
+				this.oDiv.style.top = top + 'px';
+			},
+			Up: function() {
+				document.onmousemove = null;
+				document.onmouseup = null;
+			}
+		};
+
+		var div1=new Drag("div1");
+
+	</script>
+</body>
+</html>

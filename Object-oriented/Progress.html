@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>进度条 面向对象</title>
+</head>
+<style>
+	#canvas1{width: 500px;height: 500px;background:#ddd;}
+</style>
+<body>
+	<canvas id="canvas1"></canvas>
+
+	<script>
+		function Progress(id) {
+			this.init(id);
+		}
+		Progress.prototype = {
+			oCanvas: null,
+			ctx: null,
+			width: 0,
+			init: function(id) {
+				this.oCanvas = document.getElementById(id);
+				this.ctx = this.oCanvas.getContext("2d");
+			},
+			drawBg: function() {
+				this.ctx.clearRect(0, 0, this.oCanvas.width, this.oCanvas.height);
+				this.ctx.beginPath();
+				this.ctx.fillStyle = "#fff";
+				this.ctx.fillRect(30, 30, 250, 10);
+			},
+			drawBar: function() {
+				this.width += 1;
+				this.ctx.beginPath();
+				this.ctx.fillStyle = 'red';
+				if(this.width == 250) {
+					this.width = 0;
+					this.drawBg();
+					this.ctx.fillRect(30, 30, this.width, 10);
+				}
+				this.ctx.fillRect(30, 30, this.width, 10);
+			}
+		}
+
+		var progress = new Progress("canvas1");
+		progress.drawBg();
+
+		function animloop() {
+			progress.drawBar();
+			setTimeout(function(){
+				animloop();
+			}, 20);
+		}
+		animloop();
+	</script>
+</body>
+</html>
