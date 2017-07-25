@@ -1,4 +1,4 @@
-ǰ�ˣ�
+前端：
 https://jsfiddle.net/
 https://codepen.io/
 http://babeljs.io/
@@ -15,10 +15,9 @@ beyondsoft:
 http://bysdn.beyondsoft.com/#/user/login/app.dashboard/
 https://mail-proxy03.beyondsoft.com/BYSAzure-Mail01/mail/yinchunxia.nsf?OpenDatabase
 https://e-cology.beyondsoft.com/login/Login.js
-�˺ţ�yinchunxia
+ÕËºÅ£ºyinchunxia
 
-
-�鼮��
+书籍
 http://bestcbooks.com/categories/html/
 
 
