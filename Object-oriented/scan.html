@@ -4,10 +4,179 @@
 	<meta charset="UTF-8">
 	<title>扫描 面向对象</title>
 </head>
+<style>
+	*{
+		margin: 0;
+		padding: 0;
+	}
+	#img1,#xb_canvas{
+		width: 405px;
+		height: 600px;
+	}
+	#wrap{
+		position: relative;
+		width: 405px;
+		height: 600px;
+	}
+	#color{
+		position: absolute;
+		top: -600px;
+		left: 0;
+		z-index: 20;
+	}
+	#grid{
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 10;
+	}
+</style>
 <body>
-	<div class="wrap">
-		<canvas id="color"></canvas>
-		<canvas id="grid"></canvas>
+	<div id="wrap">
+		<img src="http://img2.imgtn.bdimg.com/it/u=2875481638,2687092906&fm=214&gp=0.jpg" id="img1">
 	</div>
+	
+	<script>
+
+		function Scan(WrapId) {
+			this.init(WrapId);
+			this.DrawGrid();
+			this.DrawColor();
+			this.animateRadar();
+		}
+		Scan.prototype = {
+			wrap: null,
+			image: null,
+			width: 0,
+			height: 0,
+			gridCtx: null,
+			colorCtx: null,
+			grd: null,
+			timer: null,
+			pos: 0,
+			totle: 0,
+			$: function(obj) {
+				if(typeof(obj) == "string") {
+	                if(obj.indexOf("#") >= 0) {
+	                    obj = obj.replace("#","");
+	                    if(document.getElementById(obj)) {
+	                        return document.getElementById(obj);
+	                    } else {
+	                        return null;
+	                    }
+	                } else {
+	                    return document.createElement(obj);
+	                }
+	            } else {
+	                return obj;
+	            }
+			},
+			init: function(WrapId){
+				this.wrap = this.$(WrapId);
+				this.image = this.wrap.getElementsByTagName('img')[0];
+				console.log(this.image);
+				this.width = this.image.width;
+				this.height = this.image.height;
+				console.log('_width:',this.width);
+				console.log('_height:',this.height);
+				this.pos = this.height / 50.0;
+				this.totle = this.height / 50.0;
+			},
+			DrawGrid: function() {
+				var canvas_grid = this.$("canvas");
+				canvas_grid.id = 'grid';
+				canvas_grid.width = this.width;
+				canvas_grid.height = this.height;
+				this.gridCtx = canvas_grid.getContext("2d");
+				this.gridCtx.lineWidth = "2";
+				this.gridCtx.strokeStyle = "rgba(220,210,200,0.3)";
+				dx = 32;
+				dy = 32;
+				for(var x=0; x<this.width; x+=dx) {
+					this.gridCtx.beginPath();
+					this.gridCtx.moveTo(x, 0);
+			        this.gridCtx.lineTo(x, this.height);
+			        this.gridCtx.stroke();
+			        this.gridCtx.closePath();
+				}
+				for(var y=0; y<this.height; y+=dy) {
+					this.gridCtx.beginPath();
+					this.gridCtx.moveTo(0, y);
+			        this.gridCtx.lineTo(this.width,y);
+			        this.gridCtx.stroke();
+			        this.gridCtx.closePath();
+				}
+
+				dx /= 5; dy /= 5;
+				this.gridCtx.lineWidth = "1";
+				for(var x=0; x<this.width; x+=dx) {
+					if(x%5 !=0) {
+						this.gridCtx.beginPath();
+						this.gridCtx.moveTo(x, 0);
+				        this.gridCtx.lineTo(x, this.height);
+				        this.gridCtx.stroke();
+				        this.gridCtx.closePath();
+					}
+				}
+				for(var y=0; y<this.height; y+=dy) {
+					if(y%5 != 0) {
+						this.gridCtx.beginPath();
+						this.gridCtx.moveTo(0, y);
+				        this.gridCtx.lineTo(this.width,y);
+				        this.gridCtx.stroke();
+				        this.gridCtx.closePath();
+					}
+				}
+				wrap.appendChild(canvas_grid);
+			},
+			DrawColor: function() {
+				var canvas_color = this.$("canvas");
+				canvas_color.id = 'color';
+				canvas_color.width = this.width;
+				canvas_color.height = this.height*2;
+				this.colorCtx = canvas_color.getContext("2d");
+				this.colorCtx.clearRect(0,0,this.width,this.height*2);
+				this.grd = this.colorCtx.createLinearGradient(0,0,0,this.height*2), 
+					colorStart = "rgba(30,180,240,0.8)",
+		          	colorEnd = "rgba(30,180,240,0.0)";
+				this.grd.addColorStop(0, colorStart);
+				this.grd.addColorStop(.05, colorEnd);
+				this.grd.addColorStop(.3, colorEnd);
+				this.grd.addColorStop(.5, colorStart);
+				this.grd.addColorStop(.55, colorEnd);
+				this.grd.addColorStop(.8, colorEnd);
+				this.grd.addColorStop(1, colorStart);
+				this.colorCtx.fillStyle = this.grd;
+				this.colorCtx.fillRect(0,0,this.width,this.height*2);
+				this.wrap.appendChild(canvas_color);
+			},
+			showRadar: function(pos) {
+				this.colorCtx.clearRect(0,0,this.width,this.height*2);
+			    this.colorCtx.translate(0, this.pos);
+			    this.colorCtx.fillStyle = this.grd;
+				this.colorCtx.fillRect(0,0,this.width,this.height*2);
+			},
+			animateRadar: function() {
+				this.showRadar(this.pos);
+		        if (this.totle >= this.height){
+		        	this.pos = "-" + this.height;
+		        	this.totle = 0;
+		        } else {
+		        	this.pos = this.height / 50.0;
+		        	this.totle += this.pos;
+		        }
+		        var _this = this;
+		        this.timer = setTimeout(function(){
+		          _this.animateRadar();
+		        }, 50);
+			},
+			finishRadar: function() {
+				clearTimeout(this.timer);
+			}
+		}
+
+		var scan = new Scan('#wrap');
+
+	</script>
 </body>
 </html>
