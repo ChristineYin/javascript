@@ -1,4 +1,4 @@
-前端：
+﻿前端：
 https://jsfiddle.net/
 https://codepen.io/
 http://babeljs.io/
@@ -23,3 +23,17 @@ http://bestcbooks.com/categories/html/
 
 C#:
 https://docs.microsoft.com/zh-cn/dotnet/csharp/csharp
+
+共享资源吧
+http://www.zygx8.com/
+(范范之辈 1234qwer!@#$)
+
+Vue:
+
+Vue.js高级实战-开发移动端音乐WebApp:
+链接：http://pan.baidu.com/s/1c19i3fi 密码：kbdj
+
+Vue 网易云音乐播放器
+https://github.com/IFmiss/vue-music
+
+ +https://mp.weixin.qq.com/s?__biz=MzA3NTYzODYzMg==&mid=2653577777&idx=1&sn=4b5377051bd849b85af17bcf8c05174c&scene=4#wechat_redirect
