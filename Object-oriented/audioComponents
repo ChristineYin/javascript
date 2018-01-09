@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Audio</title>
+    <style>
+    .time {
+        margin: 10px 20px;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+    }
+
+    .slidebar {
+        margin: 0 20px;
+        position: relative;
+        width: 150px;
+        height: 8px;
+        background: #969595;
+        border-radius: 5px;
+    }
+
+    .slide-pro {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 0px;
+        height: 8px;
+        background: #41bba0;
+        border-radius: 5px;
+    }
+
+    .slidebar .slide-thumb {
+        position: absolute;
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        margin-left: -9px;
+        margin-top: -5px;
+        border-radius: 50%;
+        background: #41bba0;
+        z-index: 10;
+        cursor: pointer;
+    }
+
+    .playRate {
+        display: flex;
+        flex-direction: row;
+        cursor: pointer;
+    }
+
+    .playRate li {
+        padding: 5px 15px;
+        border: 1px solid #ccc;
+        list-style-type: none;
+    }
+
+    .noSelect {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="progress">
+        <div class="time">
+            <div class="currTime">
+                <span class="text-curTime">0:00</span>
+            </div>
+            <div class="slidebar noSelect">
+                <div class="slide-pro"></div>
+                <span class="slide-thumb"></span>
+            </div>
+            <div class="totalTime">
+                <span class="text-totalTime"></span>
+            </div>
+        </div>
+        <ul class="playRate">
+            <li class="slower">慢速</li>
+            <li class="slow">稍慢</li>
+            <li class="normal">正常</li>
+            <li class="fast">稍快</li>
+            <li class="faster">快速</li>
+        </ul>
+    </div>
+    <!--<audio src="http://ws.stream.qqmusic.qq.com/101555425.m4a?fromtag=46"></audio>-->
+    <script src="jquery-3.2.1.min.js"></script>
+    <script>
+    // 时间格式化 mm:ss
+    function _pad(num, n = 2) {
+        let len = num.toString().length
+        while (len < n) {
+            num = '0' + num;
+            len++;
+        }
+        return num;
+    }
+
+    function timeFormat(interval) {
+        interval = interval | 0
+        const minute = interval / 60 | 0
+        const second = this._pad(interval % 60)
+        return minute + ":" + second;
+    }
+
+    function audioComponent(options) {
+        // 默认参数设置
+        this.src = options.src || "";
+        this.autoplay = options.autoplay || true;
+        this.loop = options.loop || false;
+
+        this.slideBar = options.slideBar || "";
+        this.slideThumb = options.slideThumb || "";
+        this.slidePro = options.slideLeft || "";
+
+        this.playing = options.playing || null;
+        this.ended = options.ended || null;
+        this.seek = options.seek || null;
+
+        this.duration = 0;
+        this.currentTime = 0;
+
+        this.isSlideMouseMove = false;
+    };
+
+    audioComponent.prototype = {
+        // 创建audio元素
+        _create: function() {
+            let _this = this;
+            let audio = $("<audio>").attr({
+                "src": _this.src,
+                "autoplay": _this.autoplay,
+                "loop": _this.loop
+            })
+            $("body").append(audio);
+            _this.audio = audio[0];
+        },
+        // 播放
+        play: function() {
+            this.audio.play();
+        },
+        // 暂停
+        pause: function() {
+            this.audio.pause();
+        },
+        _getDuration: function() {
+            return this.duration;
+        },
+        // 获取音频播放时长
+        _seek: function() {
+            let _this = this;
+            $(_this.audio).on('canplay seek', function() {
+                _this.duration = _this.audio.seekable.end(0);
+                if (typeof _this.seek === "function") {
+                    _this.seek(_this.duration);
+                }
+                _getDuration();
+            })
+        },
+        // 音频正在播放回调
+        onPlaying: function(callback) {
+            let _this = this,
+                audio = this.audio;
+            this.currentTime = audio.currentTime;
+            if (audio.addEventListener) {
+                audio.addEventListener("timeupdate", function() {
+                    if (typeof callback === "function") {
+                        callback(audio.currentTime);
+                    }
+                    if (typeof _this.playing === "function") {
+                        _this.playing(audio.currentTime);
+                    }
+                })
+            }
+        },
+        // 进度条事件绑定
+        _slideBind: function() {
+            let _this = this,
+                audio = this.audio,
+                slideBar = $(this.slideBar),
+                slideThumb = $(this.slideThumb),
+                slidePro = $(this.slidePro);
+
+            const totalWidth = slideBar.width();
+            // 按钮跟随音乐前进
+            _this.onPlaying(function(currTime) {
+                if (!_this.isSlideMouseMove) {
+                    const duration = _this.duration;
+                    const currWidth = currTime / duration * totalWidth;
+                    slideThumb.animate({ left: currWidth }, 0);
+                    slidePro.animate({ width: currWidth }, 0);
+                }
+            });
+            // 进度条的点击
+            $(this.slideBar).on("click", function(e) {
+                e.stopPropagation();
+                const mouseX = e.pageX;
+                const offsetLeft = $(this).offset().left;
+                const slideLeft = mouseX - offsetLeft;
+                const currentTime = slideLeft * _this.duration / totalWidth;
+                slideThumb.animate({ left: slideLeft }, 0);
+                audio.currentTime = currentTime;
+                audio.play();
+            })
+
+            // 滑块滑动事件
+            let initConfig = {
+                    time: 0
+                },
+                moveConfig = {};
+
+            $(this.slideThumb).on("mousedown", function(e) {
+                e.stopPropagation();
+                if (!_this.isSlideMouseMove) {
+                    console.log(_this.isSlideMouseMove)
+                    isMousedown = true;
+                    initConfig.time = audio.currentTime;
+                    initConfig.x = e.pageX;
+                    initConfig.left = parseInt($(this).css("left"));
+                    _this.isSlideMouseMove = true;
+                }
+            });
+            $(document).on("mousemove", function(e) {
+                if (_this.isSlideMouseMove) {
+                    moveConfig.x = e.pageX;
+                    const deltaX = moveConfig.x - initConfig.x;
+                    let slideLeft = initConfig.left + deltaX;
+                    if (slideLeft >= totalWidth) {
+                        slideLeft = totalWidth;
+                    } else if (slideLeft < 0) {
+                        slideLeft = 0;
+                    }
+                    let currentTime = slideLeft * _this.duration / totalWidth;
+                    audio.currentTime = currentTime;
+
+                    slideThumb.animate({ left: slideLeft }, 0);
+                    slidePro.animate({ width: slideLeft }, 0);
+                    moveConfig.time = slideLeft / totalWidth * _this.duration;
+                }
+            });
+            $(document).on("mouseup", function(e) {
+                if (_this.isSlideMouseMove) {
+                    console.log(_this.isSlideMouseMove)
+                    audio.currentTime = moveConfig.time;
+                    audio.play();
+
+                    moveConfig = {}
+                    initConfig = {}
+
+                    _this.isSlideMouseMove = false;
+                }
+            })
+        },
+        init: function() {
+            this._create();
+            this._seek();
+            this._slideBind();
+        },
+        addRateClick: function(rateObj) {
+            let _this = this;
+            for (ele in rateObj) {
+                let obj = rateObj[ele];
+                $(obj.element).on("click", function() {
+                    _this.audio.playbackRate = obj.rate;
+                    console.log(obj.rate)
+                })
+            }
+        },
+        getDuration: function() {
+            return this.duration;
+        }
+    }
+
+    audioComponent.create = function(options) {
+        let audio = new audioComponent(options);
+        audio.init();
+        return audio;
+    };
+
+    let $totalTimeText = $(".text-totalTime");
+    let $curTimeText = $(".text-curTime");
+
+    // 实例化一个音频实例
+    let mp3 = audioComponent.create({
+        src: "http://ws.stream.qqmusic.qq.com/101555425.m4a?fromtag=46",
+        autoplay: false,
+        loop: false,
+        slideBar: ".slidebar",
+        slideThumb: ".slide-thumb",
+        slideLeft: ".slide-pro",
+        seek: function(duration) {
+            const totalTimeText = timeFormat(duration);
+            $totalTimeText.text(totalTimeText);
+        },
+        playing: function(curtime) {
+            const curTimeText = timeFormat(curtime);
+            $curTimeText.text(curTimeText);
+        }
+    });
+
+    console.log(mp3.getDuration());
+
+    const ratePara = {
+        "slower": {
+            element: ".playRate .slower",
+            rate: 0.5
+        },
+        "slow": {
+            element: ".playRate .slow",
+            rate: 0.8
+        },
+        "normal": {
+            element: ".playRate .normal",
+            rate: 1.0
+        },
+        "fast": {
+            element: ".playRate .fast",
+            rate: 1.3,
+        },
+        "faster": {
+            element: ".playRate .faster",
+            rate: 2.0
+        }
+    }
+    // 不同语速设置
+    mp3.addRateClick(ratePara);
+    </script>
+</body>
+
+</html>
