@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>翻页组件</title>
+    <style>
+    .xb_pager_navigation {
+        margin: 0
+    }
+
+    .xb_pager_navigation button {
+        display: inline-block;
+        border: 1px solid #8c8c8c;
+        vertical-align: middle;
+        text-align: center;
+        border-radius: 4px;
+        cursor: pointer;
+        outline: 0;
+        text-decoration: none;
+        background: #fff;
+        color: #333;
+        height: 32px;
+        line-height: 32px;
+        min-width: 32px;
+        padding-top: 0
+    }
+
+    .xb_pager_navigation button:hover {
+        background: #f2f2f2
+    }
+
+    .xb_pager_navigation button:disabled {
+        border: 1px solid #cecece;
+        color: #bfbfbf;
+        background: #fff;
+        cursor: default
+    }
+
+    .xb_pager_navigation .page_previous {}
+
+    .xb_pager_navigation .page_next {
+        margin-left: 4px;
+    }
+
+    .xb_pager_navigation .page_number {
+        display: inline-block;
+        font-size: 14px;
+        vertical-align: middle;
+        margin-right: 12px;
+    }
+
+    .xb_pager_navigation .page_goto {
+        margin-left: 4px;
+        margin-right: 24px;
+        padding-left: 10px !important;
+        padding-right: 10px !important
+    }
+
+
+    .xb_pager_navigation .page_previous i.xb {
+        display: inline-block;
+        text-align: center;
+        font-size: 10px;
+        margin-left: 4px;
+        margin-right: 8px;
+        line-height: 32px;
+        height: 32px
+    }
+
+    .xb_pager_navigation .page_next i.xb {
+        display: inline-block;
+        text-align: center;
+        font-size: 10px;
+        margin-left: 6px;
+        margin-right: 6px;
+        line-height: 32px;
+        height: 32px
+    }
+
+    .xb_pager_navigation .page_input {
+        border: 1px solid #e7e7eb;
+        padding: 4px 0;
+        line-height: 30px;
+        height: 30px;
+        line-height: 32px;
+        height: 32px;
+        width: 75px;
+        vertical-align: middle;
+        border-radius: 3px;
+        font-size: 14px;
+        color: #222;
+        margin: 0;
+        outline: 0;
+        font-family: inherit;
+        display: inline-block;
+        text-align: center;
+        margin: 0 4px 0 8px
+    }
+
+    .xb_pager_navigation .pager_tips {
+        display: inline-block;
+        background-color: #ff8181;
+        color: #fff;
+        vertical-align: middle;
+        text-align: center;
+        height: 20px;
+        line-height: 20px;
+        padding: 0 20px;
+        border-radius: 3px
+    }
+    </style>
+</head>
+
+<body>
+    <!-- 第一种 -->
+    <div class="xb_pager_navigation">
+        <div id="xbCommonPagerNumber" class="page_number"></div>
+        <button id="xbCommonPagerPreviousButton" class="page_previous" disabled>上一页</button>
+        <button id="xbCommonPagerNextButton" class="page_next">下一页</button>
+    </div>
+    <!-- 第二种 -->
+    <div class="xb_pager_navigation">
+        <span id="xbCommonPagerTips" class="pager_tips" style="display: none">tips</span>
+        <input id="xbCommonPagerInput" type="text" class="page_input">
+        <button id="xbCommonPagerGotoButton" class="page_goto">跳转</button>
+        <div id="xbCommonPagerNumber" class="page_number"></div>
+        <button id="xbCommonPagerPreviousButton" class="page_previous" disabled>上一页</button>
+        <button id="xbCommonPagerNextButton" class="page_next">下一页</button>
+    </div>
+    <script src="../js/jquery.js"></script>
+    <script>
+    //pager
+    let XbPager;
+    (function(xbPager) {
+        //pageCallback required async false
+        xbPager.simplePager = function(containerSelectorName, pageCallback, pageIndex, pageSize, pageCount) {
+            if (!$(containerSelectorName).length) {
+                console.warn("xbPager simplePage containerSelectorName error");
+                return;
+            }
+
+            if (!pageCallback) {
+                return;
+            }
+
+            let pagerContainer = $(".pager_navigation");
+            (pageCount === 1) ? pagerContainer.hide() : pagerContainer.show();
+            !pageIndex && pageIndex = 1;
+            !pageSize  && pageSize = 10;
+            !pageCount && pageCount = 1;
+           
+            let previousButton = $(containerSelectorName).find("#xbCommonPagerPreviousButton");
+            let nextButton = $(containerSelectorName).find("#xbCommonPagerNextButton");
+            let pageNumber = $(containerSelectorName).find("#xbCommonPagerNumber");
+
+            let updatePagerSelf = () => {
+                pageNumber.text(pageIndex + "/" + pageCount);
+                if (pageIndex == 1) {
+                    previousButton.attr("disabled", "diabled");
+                } else {
+                    previousButton.removeAttr("disabled");
+                }
+                if (pageCount == pageIndex) {
+                    nextButton.attr("disabled", "diabled");
+                } else {
+                    nextButton.removeAttr("disabled");
+                }
+            }
+
+            let updatePagerCallback = () => {
+                if (pageResult && pageResult.pageIndex && pageResult.pageCount) {
+                  pageIndex = pageResult.pageIndex;
+                  pageCount = pageResult.pageCount;
+                  updatePagerSelf();
+                }
+            }
+
+            //init
+            updatePagerSelf();
+            //end init
+
+            previousButton.click(function() {
+                if (pageIndex == 1)
+                    return;
+                pageCallback(pageIndex - 1, pageSize, updatePagerCallback);
+            });
+
+            nextButton.click(function() {
+                if (pageIndex == pageCount)
+                    return;
+                pageCallback(pageIndex + 1, pageSize, updatePagerCallback);
+            });
+        }
+
+        xbPager.richPager = function(containerSelectorName, pageCallback, pageIndex, pageSize, pageCount) {
+            if (!$(containerSelectorName).length) {
+                console.warn("xbPager richPager containerSelectorName error");
+                return;
+            }
+
+            if (!pageCallback) {
+                return;
+            }
+
+            !pageIndex && pageIndex = 1;
+            !pageSize  && pageSize = 10;
+            !pageCount && pageCount = 1;
+
+            let tipsText = $(containerSelectorName).find("#xbCommonPagerTips");
+            let pageInput = $(containerSelectorName).find("#xbCommonPagerInput");
+            let previousButton = $(containerSelectorName).find("#xbCommonPagerPreviousButton");
+            let nextButton = $(containerSelectorName).find("#xbCommonPagerNextButton");
+            let gotoButton = $(containerSelectorName).find("#xbCommonPagerGotoButton");
+            let pageNumber = $(containerSelectorName).find("#xbCommonPagerNumber");
+
+            let updatePagerSelf = () => {
+                tipsText.text("").hide();
+                pageNumber.text(pageIndex + "/" + pageCount);
+                if (pageIndex == 1) {
+                    previousButton.attr("disabled", "diabled");
+                } else {
+                    previousButton.removeAttr("disabled");
+                }
+                if (pageCount == pageIndex) {
+                    nextButton.attr("disabled", "diabled");
+                } else {
+                    nextButton.removeAttr("disabled");
+                }
+            }
+
+            let updatePagerCallback = (pageResult) => {
+                if (pageResult && pageResult.pageIndex && pageResult.pageCount) {
+                    pageIndex = pageResult.pageIndex;
+                    pageCount = pageResult.pageCount;
+
+                    updatePagerSelf();
+                }
+            }
+
+            //init
+            updatePagerSelf();
+            //end init
+
+            previousButton.click(function() {
+                if (pageIndex == 1)
+                    return;
+
+                tipsText.text("").hide();
+                pageInput.val("");
+
+                pageCallback(pageIndex - 1, pageSize, updatePagerCallback);
+            });
+
+            nextButton.click(function() {
+                if (pageIndex == pageCount)
+                    return;
+
+                tipsText.text("").hide();
+                pageInput.val("");
+
+                pageCallback(pageIndex + 1, pageSize, updatePagerCallback);
+            });
+
+            gotoButton.click(function() {
+                if (pageInput.val() == "0") {
+                    tipsText.text('输入页码不正确').show();
+                    pageInput.text("");
+                    return;
+                }
+
+                var pagenumber = parseInt(pageInput.val(), 10);
+
+                if (!pagenumber) {
+                    tipsText.text('输入页码不是数字').show();
+                    pageInput.text("");
+                    return;
+                }
+
+                if (!pageInput.val().match(/^\d+$/)) {
+                    tipsText.text('输入页码有误').show();
+                    pageInput.text("");
+                    return;
+                }
+
+                if (pagenumber <= 0 || pagenumber > pageCount) {
+                    tipsText.text('输入页码不正确').show();
+                    pageInput.text("");
+                    return;
+                }
+
+                tipsText.text("").hide();
+                pageInput.val("");
+
+                pageCallback(pagenumber, pageSize, updatePagerCallback);
+            });
+        }
+
+    })(XbPager || (XbPager = {}));
+
+
+    // pager
+    // XbPager.richPager(
+    //      '#richContainer',
+    //     //这是 pager 的callback function
+    //     //注意： basePagerUpdateCallback 是 XbPager的 update UI callback 
+    //     function (pageIndex, pageSize, basePagerUpdateCallback) {
+    //         //
+    //         //执行 你的翻页逻辑
+    //         console.log(pageIndex)
+    //         currPageSize = totalAccount <= pageSize * pageIndex ? totalAccount : pageSize;
+
+    //         showCurrPage(currPageSize, materialData, pageSize * (pageIndex-1));
+
+    //         //回调 basePagerUpdateCallback
+    //         if (basePagerUpdateCallback) {
+    //             basePagerUpdateCallback({
+    //                 'pageIndex': pageIndex,
+    //                 'pageSize': pageSize,
+    //                 'pageCount': totalPage,
+    //             });
+    //         }
+    //     },
+    //     0,
+    //     pageSize,
+    //     totalPage);
+    // //pager end
+    // currPageSize = totalAccount <= pageSize ? totalAccount : pageSize;
+
+    // showCurrPage(currPageSize, materialData, 0);
+    </script>
+</body>
+
+</html>
