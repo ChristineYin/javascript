@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Model</title>
+    <link rel="stylesheet" href="../css/components.css">
+</head>
+<body>
+    <!-- confirm -->
+    <div id="xbConfirmMaskBox" class="xb_mask_box">
+        <div class="xb_mask_wrapper">
+            <div class="xb_mask_header">
+
+                <span id="xbConfirmHeaderTitle" class="mask_title"></span>
+                <button id="xbConfirmCloseButton" type="button" class="xb_btn_empty header_close">
+                    <span class="xb xb-Cancel"></span>
+                </button>
+            </div>
+            <div class="xb_mask_body">
+                <div class="mask_content">
+                    <span id="xbConfirmIcon" class='body_icon'></span>
+                    <div id="xbConfirmContent" class="body_text"></div>
+                </div>
+            </div>
+            <div class="xb_mask_footer">
+                <button id="xbConfirmOkButton" class="xb_button xb_btn_primary mask_footer_ok">确定</button>
+                <button id="xbConfirmCancelButton" class="xb_button xb_btn_default mask_footer_close">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- alert -->
+    <div id="xbAlertMaskBox" class="xb_mask_box">
+        <div class="xb_mask_wrapper">
+            <div class="xb_mask_header">
+                <span id="xbAlertHeaderTitle" class="mask_title"></span>
+                <button id="xbAlertCloseButton" type="button" class="xb_btn_empty header_close">
+                    <span class="xb xb-Cancel"></span>
+                </button>
+            </div>
+            <div class="xb_mask_body">
+                <div class="mask_content">
+                    <span id="xbAlertIcon" class='body_icon'></span>
+                    <div id="xbAlertContent" class="body_text"></div>
+                </div>
+            </div>
+            <div class="xb_mask_footer">
+                <button id="xbAlertOkButton" class="xb_button xb_btn_primary mask_footer_ok">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- input -->
+    <div id="xbInputMaskBox" class="xb_mask_box">
+        <div class="xb_mask_wrapper">
+            <div class="xb_mask_header">
+                <span id="xbInputHeaderTitle" class="mask_title"></span>
+                <button id="xbInputCloseButton" type="button" class="xb_btn_empty header_close">
+                    <span class="xb xb-Cancel"></span>
+                </button>
+            </div>
+            <div class="xb_mask_body" style="min-height: 172px">
+                <div class="mask_content">
+                    <div id="xbInputDescription" class="input_description"></div>
+                    <input id="xbInputText" value="" type="text" class="input_text"/>
+                    <input id="xbInputText" value="" type="text" class="xb_text_input" style="min-width: 400px;" />
+                    <span id="xbInputTips" class="input_tips">
+                    </span>
+                </div>
+            </div>
+            <div class="xb_mask_footer">
+                <button id="xbInputOkButton" class="xb_button xb_btn_primary mask_footer_ok">确定</button>
+                <button id="xbInputCancelButton" class="xb_button xb_btn_default mask_footer_close">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- toast -->
+    <div id="xbToastMaskBox" class="xb_toast_box">
+        <div class="xb_toast_wrapper">
+            <div id="xbToastContentWrapper" class="toast_content_wrapper">
+                <i id="xbToastIcon" class="mask_icon"></i>
+                <span id="xbToastContent" class="mask_content"></span>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/jquery.js"></script>
+    <script>
+        var XbModal;
+        (function (xbModal) {
+
+            // confirm
+            xbModal.confirm = function (obj) {
+                var type = '';
+                var title = '';
+                var text = '';
+                var textDom = '';
+                var okButtonText = '确定';
+                var closeButtonText = '取消';
+                var displayIcon = false;
+                var okCallback = '';
+                var closeCallback = '';
+
+                if (!obj.hasOwnProperty('type') || (!obj.hasOwnProperty('text') && !obj.hasOwnProperty('textDom'))) {
+                    return;
+                } else {
+                    type = obj.type;
+                    if (obj.hasOwnProperty('title')) {
+                        title = obj.title;
+                    }
+                    if (obj.hasOwnProperty('text')) {
+                        text = obj.text;
+                    }
+                    if (obj.hasOwnProperty('textDom')) {
+                        textDom = obj.textDom;
+                    }
+                    if (obj.hasOwnProperty('okButtonText')) {
+                        okButtonText = obj.okButtonText.trim() ? obj.okButtonText.trim() : okButtonText;
+                    }
+                    if (obj.hasOwnProperty('closeButtonText')) {
+                        closeButtonText = obj.closeButtonText.trim() ? obj.closeButtonText.trim() : closeButtonText;
+                    }
+                    if (obj.hasOwnProperty('displayIcon')) {
+                        displayIcon = obj.displayIcon;
+                    }
+                    if (obj.hasOwnProperty('okCallback')) {
+                        okCallback = obj.okCallback;
+                    }
+                    if (obj.hasOwnProperty('closeCallback')) {
+                        closeCallback = obj.closeCallback;
+                    }
+                }
+
+                var parent = $("#xbConfirmMaskBox");
+                var headerTitle = $("#xbConfirmHeaderTitle");
+                var content = $("#xbConfirmContent");
+                var icon = $("#xbConfirmIcon");
+                var ok = $("#xbConfirmOkButton");
+                var footerClose = $("#xbConfirmCancelButton");
+                var headerClose = $("#xbConfirmCloseButton");
+
+                var iconClass;
+                var bgColor;
+
+                switch (type) {
+                    case "success":
+                        iconClass = "xb xb-CompletedSolid";
+                        bgColor = "blue";
+                        break;
+                    case "error":
+                        iconClass = "xb xb-AlertSolid";
+                        bgColor = "red";
+                        break;
+                    case "alert":
+                        iconClass = "xb xb-IncidentTriangle";
+                        bgColor = "orange";
+                        break;
+                    default:
+                        iconClass = "";
+                        bgColor = "white";
+                        break;
+                }
+
+                if (textDom) {
+                    content.html(textDom);
+                } else {
+                    content.html(text);
+                }
+
+                if (title) {
+                    headerTitle.text(title);
+                }
+
+                if (displayIcon == false) {
+                    icon.hide();
+                } else {
+                    icon.attr("class", "mask_icon " + iconClass);
+                    icon.show();
+                }
+
+                if (okButtonText != '确定') {
+                    ok.text(okButtonText);
+                }
+
+                if (closeButtonText != '取消') {
+                    footerClose.text(closeButtonText);
+                }
+
+                parent.show();
+
+                headerClose.click(function () {
+                    parent.hide();
+                    ok.unbind("click");
+                    headerClose.unbind("click");
+
+                    if (closeCallback) {
+                        closeCallback();
+                    }
+                });
+                footerClose.click(function () {
+                    parent.hide();
+                    ok.unbind("click");
+                    footerClose.unbind("click");
+
+                    if (closeCallback) {
+                        closeCallback();
+                    }
+                });
+                ok.click(function () {
+                    parent.hide();
+                    headerClose.unbind("click");
+                    footerClose.unbind("click");
+                    ok.unbind("click");
+
+                    if (okCallback) {
+                        okCallback();
+                    }
+                });
+            }
+
+            // alert
+            xbModal.alert = function (obj) {
+                var type = '';
+                var title = '';
+                var text = '';
+                var textDom = '';
+                var okButtonText = '确定';
+                var displayIcon = false;
+                var okCallback = '';
+                var closeCallback = '';
+
+                if (!obj.hasOwnProperty('type') || (!obj.hasOwnProperty('text') && !obj.hasOwnProperty('textDom'))) {
+                    return;
+                } else {
+                    type = obj.type;
+                    if (obj.hasOwnProperty('title')) {
+                        title = obj.title;
+                    }
+                    if (obj.hasOwnProperty('text')) {
+                        text = obj.text;
+                    }
+                    if (obj.hasOwnProperty('textDom')) {
+                        textDom = obj.textDom;
+                    }
+                    if (obj.hasOwnProperty('okButtonText')) {
+                        okButtonText = obj.okButtonText.trim() ? obj.okButtonText.trim() : okButtonText;
+                    }
+                    if (obj.hasOwnProperty('displayIcon')) {
+                        displayIcon = obj.displayIcon;
+                    }
+                    if (obj.hasOwnProperty('okCallback')) {
+                        okCallback = obj.okCallback;
+                    }
+                    if (obj.hasOwnProperty('closeCallback')) {
+                        closeCallback = obj.closeCallback;
+                    }
+                }
+
+                var parent = $("#xbAlertMaskBox");
+                var headerTitle = $("#xbAlertHeaderTitle");
+                var icon = $("#xbAlertIcon");
+                var ok = $("#xbAlertOkButton");
+                var headerClose = $("#xbAlertCloseButton");
+                var content = $("#xbAlertContent");
+
+                var iconClass;
+                var bgColor;
+
+                switch (type) {
+                    case "success":
+                        iconClass = "xb xb-CompletedSolid";
+                        bgColor = "blue";
+                        break;
+                    case "error":
+                        iconClass = "xb xb-AlertSolid";
+                        bgColor = "red";
+                        break;
+                    case "alert":
+                        iconClass = "xb xb-IncidentTriangle";
+                        bgColor = "orange";
+                        break;
+                    default:
+                        iconClass = "";
+                        bgColor = "white";
+                        break;
+                }
+
+                if (textDom) {
+                    content.html(textDom);
+                } else {
+                    content.html(text);
+                }
+
+                if (title) {
+                    headerTitle.text(title);
+                }
+
+                if (displayIcon == false) {
+                    icon.hide();
+                } else {
+                    icon.attr("class", "mask_icon " + iconClass);
+                    icon.show();
+                }
+
+                if (okButtonText != '确定') {
+                    ok.text(okButtonText);
+                }
+
+                parent.show();
+
+                headerClose.click(function () {
+                    parent.hide();
+                    ok.unbind("click");
+                    headerClose.unbind("click");
+
+                    if (closeCallback) {
+                        closeCallback();
+                    }
+                });
+                ok.click(function () {
+                    parent.hide();
+                    headerClose.unbind("click");
+                    ok.unbind("click");
+
+                    if (okCallback) {
+                        okCallback();
+                    }
+                });
+            }
+
+            // toast
+            xbModal.toast = function (obj) {
+
+                var type = '';
+                var text = '';
+                var textDom = '';
+                var displayIcon = true;
+
+                if (!obj.hasOwnProperty('type') || (!obj.hasOwnProperty('text') && !obj.hasOwnProperty('textDom'))) {
+                    return;
+                } else {
+                    type = obj.type;
+                    if (obj.hasOwnProperty('text')) {
+                        text = obj.text;
+                    }
+                    if (obj.hasOwnProperty('textDom')) {
+                        textDom = obj.textDom;
+                    }
+                    if (obj.hasOwnProperty('displayIcon')) {
+                        displayIcon = obj.displayIcon;
+                    }
+                }
+                if (!text)
+                    return;
+
+                var parent = $("#xbToastMaskBox");
+                var iconWrapper = $("#xbToastIconWrapper");
+                var icon = $("#xbToastIcon");
+                var contentWrapper = $("#xbToastContentWrapper");
+                var content = $("#xbToastContent");
+
+
+                var iconClass;
+                var bgColor;
+
+                switch (type) {
+                    case "success":
+                        iconClass = "xb xb-CompletedSolid white";
+                        bgColor = "blue";
+                        break;
+                    case "error":
+                        iconClass = "xb xb-StatusErrorFull white";
+                        bgColor = "red";
+                        break;
+                    case "alert":
+                        iconClass = "xb xb-AlertSolid white";
+                        bgColor = "orange";
+                        break;
+                    case "info":
+                        iconClass = "xb xb-AlertSolid white";
+                        bgColor = "white";
+                        break;
+                    default:
+                        iconClass = "";
+                        bgColor = "white";
+                        break;
+                }
+
+                if (displayIcon == false) {
+                    iconWrapper.hide();
+                    contentWrapper.attr("style", "text-align: center");
+                } else {
+                    icon.attr("class", "mask_icon " + iconClass);
+                    icon.show();
+                }
+
+                if (textDom) {
+                    content.html(textDom);
+                } else {
+                    content.text(text);
+                }
+
+                parent.show();
+
+                setTimeout(function () {
+                    parent.hide();
+                }, 2000);
+            }
+
+            // input
+            xbModal.input = function (obj) {
+                var title = '';
+                var description = '';
+                var inputValue = '';
+                var placeHolderText = '';
+                var okButtonText = '确定';
+                var closeButtonText = '取消';
+                var okCallback = '';
+                var closeCallback = '';
+                var checkCallback = '';
+
+                if (!obj.hasOwnProperty('description')) {
+                    return;
+                } else {
+                    if (obj.hasOwnProperty('title')) {
+                        title = obj.title;
+                    }
+                    if (obj.hasOwnProperty('description')) {
+                        description = obj.description;
+                    }
+                    if (obj.hasOwnProperty('inputValue')) {
+                        inputValue = obj.inputValue;
+                    }
+                    if (obj.hasOwnProperty('placeHolderText')) {
+                        placeHolderText = obj.placeHolderText;
+                    }
+                    if (obj.hasOwnProperty('okButtonText')) {
+                        okButtonText = obj.okButtonText.trim() ? obj.okButtonText.trim() : okButtonText;
+                    }
+                    if (obj.hasOwnProperty('closeButtonText')) {
+                        closeButtonText = obj.closeButtonText.trim() ? obj.closeButtonText.trim() : closeButtonText;
+                    }
+                    if (obj.hasOwnProperty('okCallback')) {
+                        okCallback = obj.okCallback;
+                    }
+                    if (obj.hasOwnProperty('closeCallback')) {
+                        closeCallback = obj.closeCallback;
+                    }
+                    if (obj.hasOwnProperty('checkCallback')) {
+                        checkCallback = obj.checkCallback;
+                    }
+                }
+
+                var parent = $("#xbInputMaskBox");
+                var headerTitle = $("#xbInputHeaderTitle");
+                var inputDescription = $("#xbInputDescription");
+                var inputText = $("#xbInputText");
+                var inputTips = $("#xbInputTips");
+                var ok = $("#xbInputOkButton");
+                var footerClose = $("#xbInputCancelButton");
+                var headerClose = $("#xbInputCloseButton");
+
+                //clean tips
+                inputTips.text("");
+
+                if (title) {
+                    headerTitle.text(title);
+                }
+
+                if (description) {
+                    inputDescription.html(description);
+                } else {
+                    inputDescription.html("");
+                }
+
+                if (inputValue) {
+                    inputText.val(inputValue);
+                } else {
+                    inputText.val("");
+                }
+
+                inputText.on("change paste keyup", function () {
+                    inputTips.text("");
+                });
+
+                if (placeHolderText) {
+                    inputText.attr('placeholder', placeHolderText);
+                }
+
+                if (okButtonText != '确定') {
+                    ok.text(okButtonText);
+                }
+
+                if (closeButtonText != '取消') {
+                    footerClose.text(closeButtonText);
+                }
+
+                parent.show();
+
+                headerClose.click(function () {
+                    inputText.val("");
+                    inputTips.text("");
+                    parent.hide();
+                    ok.unbind("click");
+                    headerClose.unbind("click");
+                    if (closeCallback) {
+                        closeCallback();
+                    }
+                });
+                footerClose.click(function () {
+                    inputText.val("");
+                    inputTips.text("");
+                    parent.hide();
+                    ok.unbind("click");
+                    footerClose.unbind("click");
+
+                    if (closeCallback) {
+                        closeCallback();
+                    }
+                });
+                ok.click(function () {
+                    var textValue = inputText.val();
+                    if (checkCallback && typeof checkCallback == 'function') {
+                        var error = checkCallback(textValue);
+                        if (error) {
+                            inputTips.text(error);
+                            return;
+                        }
+                    }
+
+                    inputText.val("");
+                    inputTips.text("");
+                    parent.hide();
+                    headerClose.unbind("click");
+                    footerClose.unbind("click");
+                    ok.unbind("click");
+
+                    okCallback(textValue);
+                });
+            };
+
+        })(XbModal || (XbModal = {}))
+    </script>
+
+    <script>
+        XbModal.confirm({
+            type: "success",
+            title: "confirm 自定义标题",
+            text: "confirm 自定义内容-----------------------------------",
+            okCallback: function () {
+                $("#confirmP").text("confirm 点击了确定");
+            },
+            closeCallback: function () {
+                $("#confirmP").text("confirm 点击了关闭");
+            },
+        });
+    </script>
+</body>
+</html>
